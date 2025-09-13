@@ -1,0 +1,18 @@
+# Amplify用のDockerfile（必要に応じて）
+FROM node:18-alpine
+
+WORKDIR /app
+
+# 依存関係をコピーしてインストール
+COPY package*.json ./
+RUN npm ci --only=production
+
+# アプリケーションコードをコピー
+COPY . .
+
+# ビルド
+RUN npm run build
+
+# ポート3000で起動
+EXPOSE 3000
+CMD ["npm", "start"]
