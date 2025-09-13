@@ -1,0 +1,3 @@
+[submodule "backend/infrastructure/bedrock-gateway"]
+	path = backend/infrastructure/bedrock-gateway
+	url = https://github.com/aws-samples/bedrock-access-gateway.git
