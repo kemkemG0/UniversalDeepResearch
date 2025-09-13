@@ -23,20 +23,24 @@ import ResearchProgressFooter from './ResearchProgressFooter';
 import ResearchProgressHeader from './ResearchProgressHeader';
 import { ApplicationState } from '@/types/ApplicationState';
 
-export type ResearchEventType = 
+export type ResearchEventType =
+  | 'started'
+  | 'completed'
+  | 'error'
   | 'prompt_received'
   | 'prompt_analysis_started'
   | 'prompt_analysis_completed'
   | 'task_analysis_completed'
   | 'topic_exploration_started'
+  | 'topic_exploration_completed'
   | 'search_started'
   | 'search_result_processing_started'
   | 'aggregation_started'
   | 'research_completed'
   | 'report_building'
-  | 'report_formatting'
+  | 'report_processing'
   | 'report_done'
-  | 'error';
+  | 'generic';
 
 export interface ResearchEvent {
   id: string;
@@ -53,7 +57,7 @@ interface ResearchProgressListProps {
   onViewError?: () => void;
 }
 
-export default function ResearchProgressList({ 
+export default function ResearchProgressList({
   state,
   onStop,
   onClear,
@@ -90,15 +94,15 @@ export default function ResearchProgressList({
       {state.type !== 'idle' && (
         <div className={styles.content}>
           <div className={styles.container}>
-            <ResearchProgressHeader 
-              state={state} 
+            <ResearchProgressHeader
+              state={state}
               onStop={onStop}
               onClear={onClear}
               onFinalize={onFinalize}
               onViewError={onViewError}
             />
-            <div 
-              ref={listRef} 
+            <div
+              ref={listRef}
               className={styles.list}
               onScroll={handleScroll}
             >

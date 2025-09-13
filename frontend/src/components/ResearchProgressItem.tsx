@@ -17,18 +17,17 @@
 'use client';
 
 import { ArrowDownOnSquareIcon, BoltIcon, ExclamationCircleIcon, BeakerIcon, MagnifyingGlassIcon, DocumentMagnifyingGlassIcon, DocumentCheckIcon, ClipboardDocumentListIcon, ArchiveBoxIcon, Cog8ToothIcon, LightBulbIcon, DocumentTextIcon, CheckCircleIcon, ChatBubbleLeftEllipsisIcon } from '@heroicons/react/24/outline';
-import { ResearchEvent } from './ResearchProgressList';
+import { ResearchEvent, ResearchEventType } from './ResearchProgressList';
 import styles from './ResearchProgressItem.module.css';
 
 interface ResearchProgressItemProps {
   event: ResearchEvent;
 }
 
-const iconMap = {
+const iconMap: Record<ResearchEventType, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
   'started': BoltIcon,
   'completed': CheckCircleIcon,
   'error': ExclamationCircleIcon,
-
   'prompt_received': ArrowDownOnSquareIcon,
   'prompt_analysis_started': BeakerIcon,
   'prompt_analysis_completed': DocumentTextIcon,
@@ -46,7 +45,7 @@ const iconMap = {
 };
 
 export default function ResearchProgressItem({ event }: ResearchProgressItemProps) {
-  const Icon = event.type in iconMap ? iconMap[event.type] : ChatBubbleLeftEllipsisIcon;
+  const Icon = iconMap[event.type] || ChatBubbleLeftEllipsisIcon;
   const iconColor = event.type === 'error' ? 'text-red-500' : 'text-gray-500';
 
   return (
