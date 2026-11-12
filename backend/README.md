@@ -224,6 +224,29 @@ The system expects API keys in text files:
 
 ## API Endpoints
 
+### Research Access
+
+Both research endpoints require an operator-issued bearer token, including dry
+runs, reporting continuations, and custom strategies. Set `RESEARCH_API_TOKEN` in
+the backend environment or `.env` before starting the server. Generate a strong
+random token, for example with `python3 -c 'import secrets; print(secrets.token_urlsafe(32))'`.
+There is no default token: an unset or blank value disables research with HTTP
+503. Missing or incorrect credentials return HTTP 401 before research starts.
+The health check remains public.
+
+Send `Authorization: Bearer <token>` with every research request. In the web UI,
+enter the token in **Research access token**; it is kept in component memory, not
+browser storage. Do not embed the token in `NEXT_PUBLIC_*` variables, URLs, or
+frontend builds, and do not reuse an LLM or search provider API key.
+
+Share the token only with callers authorized to spend the operator's API budget.
+It grants access to both research implementations, not a per-user spending quota.
+Use HTTPS outside localhost, configure the token as a backend secret for hosted
+deployments (including ECS), and restart the backend to rotate it. Existing
+deployments must configure this token and update clients before research works.
+For the curl examples below, export the same token as `RESEARCH_API_TOKEN` in
+the calling shell.
+
 ### GET `/`
 
 Health check endpoint that returns a status message.
@@ -275,6 +298,7 @@ Advanced reliability framework endpoint using FrameV4 system. This is the endpoi
 ```bash
 curl -X POST http://localhost:8000/api/research \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $RESEARCH_API_TOKEN" \
   -d '{
     "prompt": "What are the latest developments in quantum computing?",
     "start_from": "research"
@@ -286,6 +310,7 @@ curl -X POST http://localhost:8000/api/research \
 ```bash
 curl -X POST http://localhost:8000/api/research \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $RESEARCH_API_TOKEN" \
   -d '{
     "dry": true,
     "prompt": "Test research query",
@@ -298,6 +323,7 @@ curl -X POST http://localhost:8000/api/research \
 ```bash
 curl -X POST http://localhost:8000/api/research \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $RESEARCH_API_TOKEN" \
   -d '{
     "session_key": "20241201T120000Z-abc12345", # This would be the key of the session which you have previously started
     "start_from": "reporting"

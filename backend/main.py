@@ -23,11 +23,12 @@ import asyncio
 import json
 import os
 import random
+import secrets
 from datetime import datetime
 from typing import Any, AsyncGenerator, Dict, Optional
 
 import uvicorn
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -109,7 +110,33 @@ def make_message(
     return json.dumps({"event": event, "session_key": session_key}) + "\n"
 
 
-@app.post("/api/research")
+async def require_research_access(request: Request) -> None:
+    expected_token = config.research.api_token
+    if not expected_token.strip():
+        raise HTTPException(
+            status_code=503, detail="Research access is not configured"
+        )
+
+    authorization_headers = request.headers.getlist("authorization")
+    authorization = (
+        authorization_headers[0] if len(authorization_headers) == 1 else ""
+    )
+    scheme, separator, token = authorization.partition(" ")
+    if (
+        scheme.lower() != "bearer"
+        or not separator
+        or not secrets.compare_digest(
+            token.encode("utf-8"), expected_token.encode("utf-8")
+        )
+    ):
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid or missing research access token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+@app.post("/api/research", dependencies=[Depends(require_research_access)])
 async def start_research(request: ResearchRequest):
     """
     Start or continue a research process and stream the results using JSON streaming.
@@ -140,6 +167,7 @@ async def start_research(request: ResearchRequest):
         ```bash
         curl -X POST http://localhost:8000/api/research \\
           -H "Content-Type: application/json" \\
+          -H "Authorization: Bearer $RESEARCH_API_TOKEN" \\
           -d '{
             "prompt": "What are the latest developments in quantum computing?",
             "start_from": "research"
@@ -262,7 +290,7 @@ async def stream_research_events(
         raise
 
 
-@app.post("/api/research2")
+@app.post("/api/research2", dependencies=[Depends(require_research_access)])
 async def start_research2(request: ResearchRequest):
     # Validate request parameters
     if request.start_from not in ["research"]:
