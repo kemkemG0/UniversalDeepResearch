@@ -95,6 +95,9 @@ class SearchConfig:
 class ResearchConfig:
     """Research configuration settings."""
 
+    api_token: str = field(
+        default_factory=lambda: os.getenv("RESEARCH_API_TOKEN", ""), repr=False
+    )
     max_topics: int = field(default_factory=lambda: int(os.getenv("MAX_TOPICS", "1")))
     max_search_phrases: int = field(
         default_factory=lambda: int(os.getenv("MAX_SEARCH_PHRASES", "1"))

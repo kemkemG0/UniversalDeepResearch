@@ -60,6 +60,7 @@ export default function Home() {
     events: []
   });
   const [reportContent, setReportContent] = useState<string>('');
+  const [researchApiToken, setResearchApiToken] = useState('');
   const [editedStrategyId, setEditedStrategyId] = useState('');
   const [strategyContents, setStrategyContents] = useState<Record<string, string>>(initialStrategyContents);
 
@@ -87,6 +88,7 @@ export default function Home() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${researchApiToken}`,
         },
         body: JSON.stringify(requestBody),
         signal: abortControllerRef.current.signal
@@ -430,6 +432,17 @@ export default function Home() {
       <main className="row-start-2 flex flex-col items-center justify-center gap-8 w-full">
         <div className="w-[min(90%,max(200pt,40%))] min-w-[30rem] flex flex-col items-center justify-center gap-8">
           <h1 className="text-4xl font-bold">NVR Universal Deep Research</h1>
+          <label className="flex flex-col gap-2 w-full">
+            Research access token
+            <input
+              type="password"
+              autoComplete="off"
+              value={researchApiToken}
+              onChange={(event) => setResearchApiToken(event.target.value)}
+              placeholder="Token provided by the operator"
+              className="border rounded p-2 bg-transparent"
+            />
+          </label>
           <PromptBar
             onResearch={handleStartResearch}
             onEditStrategy={handleStartEditingStrategy}
